@@ -1,11 +1,15 @@
+""" Titanic Survival rate predictions using the Logistic Regression Linear Classifier"""
+
 # reset-f
 
 # Importing the libraries
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
 # Importing the dataset
+
 dataset_train = pd.read_csv('Training_Data_Set_Titanic.csv')
 dataset_test = pd.read_csv('Test_Data_Set_Titanic.csv')
 X_train = dataset_train.iloc[:, [0,2,4,5,6,7,9]].values
@@ -15,12 +19,14 @@ X_test = dataset_test.iloc[:, [0,1,3,4,5,6,8]].values
 passenger_id=X_test[:,0]
 
 # Taking care of missing data for numerical values in training dataset
+
 from sklearn.preprocessing import Imputer
 imputer = Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0)
 imputer = imputer.fit(X_train[:, [3]])
 X_train[:,[3]] = imputer.transform(X_train[:,[3]])
 
 # Taking care of missing data for numerical values in test dataset
+
 from sklearn.preprocessing import Imputer
 imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
 imputer = imputer.fit(X_test[:, [3]])
@@ -28,6 +34,7 @@ X_test[:,[3]] = imputer.transform(X_test[:,[3]])
 
 # Encoding categorical data
 # Encoding the Independent Variable of the Training dataset
+
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 labelencoder_Xtrain = LabelEncoder()
 X_train[:,2] = labelencoder_Xtrain.fit_transform(X_train[:,2])
@@ -36,6 +43,7 @@ X_train = onehotencoder.fit_transform(X_train).toarray()
 
 # Encoding categorical data
 # Encoding the Independent Variable of the Test dataset
+
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 labelencoder_Xtest = LabelEncoder()
 X_test[:,2] = labelencoder_Xtest.fit_transform(X_test[:,2])
@@ -43,6 +51,7 @@ onehotencoder = OneHotEncoder(categorical_features =[2])
 X_test = onehotencoder.fit_transform(X_test).toarray()
 
 # Feature Scaling
+
 from sklearn.preprocessing import StandardScaler
 sc_X = StandardScaler()
 X_train = sc_X.fit_transform(X_train)
@@ -53,23 +62,27 @@ sc_Xtest = StandardScaler()
 X_test = sc_Xtest.fit_transform(X_test)
 
 # Applying the LDA , this is a supervised model where we include the dependent variable
+
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 lda = LDA(n_components = 2)
 X_train = lda.fit_transform(X_train,y_train)
 X_test = lda.transform(X_train)
 
 # Fitting the Logistic Regression Model
+
 from sklearn.linear_model import LogisticRegression
 classifier = LogisticRegression(random_state = 0)
 classifier.fit(X_train,y_train)
 
 #Predicting the test set results
+
 y_pred = classifier.predict(X_train)
 #results={"PassengerID":passenger_id,"Survived":y_pred}
 results_df=pd.DataFrame(data=y_pred,index=passenger_id,columns=["Survived"])
 results_df.to_csv("titanic_pred_logistic_regg.csv")
 
 # Applying the K-Fold Cross Validation for right model selection technique and for evaluating the model performance
+
 from sklearn.model_selection import cross_val_score
 accuracies = cross_val_score(estimator = classifier,X = X_train,y = y_train,cv = 10)
 accuracies.mean()
